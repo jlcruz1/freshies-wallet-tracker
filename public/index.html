@@ -6,7 +6,7 @@
     <title>Freshies - Fresh Wallet Tracker</title>
     <link rel="stylesheet" href="styles.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
 </head>
 <body>
     <div class="app-container">
@@ -14,11 +14,17 @@
         <header class="header">
             <div class="header-content">
                 <div class="logo">
-                    <i class="fas fa-seedling"></i>
-                    <h1>Freshies</h1>
+                    <div class="logo-icon">
+                        <i class="fas fa-fire"></i>
+                    </div>
+                    <div class="logo-text">
+                        <h1>Freshies</h1>
+                        <span class="logo-subtitle">Solana Fresh Wallet Tracker</span>
+                    </div>
                 </div>
-                <div class="header-subtitle">
-                    <p>Real-time Solana Fresh Wallet Detection</p>
+                <div class="status-indicator">
+                    <div class="status-dot"></div>
+                    <span>Live Tracking</span>
                 </div>
             </div>
         </header>
@@ -57,16 +63,7 @@
             </div>
         </section>
 
-        <!-- Manual Wallet Check -->
-        <section class="manual-check">
-            <div class="check-container">
-                <h3>Manual Wallet Check</h3>
-                <div class="check-input">
-                    <input type="text" id="walletAddress" placeholder="Enter wallet address to check...">
-                    <button id="manualCheck">Check Wallet</button>
-                </div>
-            </div>
-        </section>
+
 
         <!-- Trading Patterns Analytics -->
         <section class="analytics-section">

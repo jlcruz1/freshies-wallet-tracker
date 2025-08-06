@@ -96,45 +96,9 @@ class FreshiesDashboard {
 
     // Socket.IO version doesn't need fetchTokenAnalytics - data comes via events
 
-    async checkWallet(walletAddress) {
-        console.log('Manual check requested for:', walletAddress);
-        // For Socket.IO version, emit a manual check event to server
-        if (this.socket) {
-            this.socket.emit('manualCheck', { walletAddress });
-            return { success: true, message: 'Manual check requested' };
-        } else {
-            console.error('Socket.IO not connected');
-            return { success: false, error: 'Not connected to server' };
-        }
-    }
+
 
     setupEventListeners() {
-        // Manual wallet check
-        const checkButton = document.getElementById('manualCheck');
-        const walletInput = document.getElementById('walletAddress');
-        
-        if (checkButton && walletInput) {
-            checkButton.addEventListener('click', async () => {
-                const address = walletInput.value.trim();
-                if (address) {
-                    checkButton.textContent = 'Checking...';
-                    checkButton.disabled = true;
-                    
-                    await this.checkWallet(address);
-                    
-                    checkButton.textContent = 'Check Wallet';
-                    checkButton.disabled = false;
-                    walletInput.value = '';
-                }
-            });
-
-            walletInput.addEventListener('keypress', (e) => {
-                if (e.key === 'Enter') {
-                    checkButton.click();
-                }
-            });
-        }
-
         // Copy wallet addresses
         document.addEventListener('click', (e) => {
             if (e.target.matches('.wallet-action.copy') || e.target.closest('.wallet-action.copy')) {
