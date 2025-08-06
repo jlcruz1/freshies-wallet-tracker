@@ -35,6 +35,7 @@ class FreshWalletDetector {
     this.processedWallets = new Set();
     this.checkCount = 0;
     this.lastResetTime = Date.now();
+    this.sessionStartTime = Date.now(); // Track session start for fresh data
     
     // Statistics
     this.stats = {
@@ -1094,9 +1095,50 @@ class FreshWalletDetector {
   }
 
   /**
+   * Clear all cached data for fresh session start
+   */
+  clearAllCachedData() {
+    console.log('🧹 Clearing all cached data for fresh start...');
+    
+    // Clear in-memory tracking data
+    this.processedWallets.clear();
+    this.tokenTracker = {
+      all: [],
+      success: [],
+      failed: []
+    };
+    this.whaleTracker = {
+      all: [],
+      fresh: [],
+      whaleThreshold: 100
+    };
+    
+    // Reset statistics to zero
+    this.stats = {
+      totalWalletsDetected: 0,
+      freshWalletsFound: 0,
+      whalesFound: 0,
+      freshWhalesFound: 0,
+      duplicatesSkipped: 0,
+      nonUserAccountsSkipped: 0,
+      rpcErrors: 0,
+      lastDetectionTime: null,
+      uptime: this.sessionStartTime
+    };
+    
+    this.checkCount = 0;
+    this.lastResetTime = Date.now();
+    
+    console.log('✅ All cached data cleared - starting fresh session');
+  }
+
+  /**
    * Start analytics emission intervals
    */
   startAnalyticsIntervals() {
+    // Clear all cached data first for fresh start
+    this.clearAllCachedData();
+    
     // Emit token analytics every 30 seconds
     setInterval(() => {
       this.emitTokenAnalytics();
@@ -1107,7 +1149,7 @@ class FreshWalletDetector {
       this.emitWhaleAnalytics();
     }, 30000);
 
-    // Emit initial analytics after 5 seconds
+    // Emit initial analytics after 5 seconds (should be empty/zero)
     setTimeout(() => {
       this.emitTokenAnalytics();
       this.emitWhaleAnalytics();

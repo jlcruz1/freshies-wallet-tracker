@@ -33,12 +33,32 @@ class FreshiesDashboard {
     async init() {
         console.log('🚀 Initializing Freshies Dashboard (Local)...');
         
+        // Clear any browser cache or localStorage
+        this.clearBrowserCache();
+        
         this.setupEventListeners();
         this.initializeAnalyticsTabs();
         this.initializeWhaleTabs();
         this.setupSocketConnection();
         
         console.log('✅ Dashboard initialized');
+    }
+
+    clearBrowserCache() {
+        console.log('🧹 Clearing browser cache for fresh session...');
+        
+        // Clear localStorage
+        if (typeof(Storage) !== "undefined") {
+            localStorage.clear();
+            sessionStorage.clear();
+        }
+        
+        // Clear any persistent data variables
+        this.lastStats = null;
+        this.lastTokenAnalytics = null;
+        this.lastWhaleAnalytics = null;
+        
+        console.log('✅ Browser cache cleared');
     }
 
     setupSocketConnection() {
