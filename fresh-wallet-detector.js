@@ -159,6 +159,78 @@ class FreshWalletDetector {
     this.app.use(cors());
     this.app.use(express.static(path.join(__dirname, 'public')));
 
+    // API Routes for Railway compatibility
+    this.app.get('/api/stats', (req, res) => {
+      res.json({
+        success: true,
+        stats: this.stats
+      });
+    });
+
+    this.app.get('/api/tokens', (req, res) => {
+      const category = req.query.category || 'all';
+      const minutes = parseInt(req.query.minutes) || 5;
+      
+      let tokens = [];
+      if (this.tokenTracker) {
+        const analytics = this.getMostTradedTokens();
+        if (analytics[category] && analytics[category][`${minutes}min`]) {
+          tokens = analytics[category][`${minutes}min`];
+        }
+      }
+      
+      res.json({
+        success: true,
+        tokens: tokens
+      });
+    });
+
+    this.app.get('/api/whales', (req, res) => {
+      let whaleData = {
+        totalWhales: 0,
+        totalFreshWhales: 0,
+        allWhales: [],
+        freshWhales: []
+      };
+      
+      if (this.whaleTracker) {
+        whaleData = {
+          totalWhales: this.whaleTracker.all.length,
+          totalFreshWhales: this.whaleTracker.fresh.length,
+          allWhales: this.whaleTracker.all,
+          freshWhales: this.whaleTracker.fresh
+        };
+      }
+      
+      res.json({
+        success: true,
+        whaleData: whaleData
+      });
+    });
+
+    this.app.get('/api/wallet-data', (req, res) => {
+      const address = req.query.address;
+      if (!address) {
+        return res.status(400).json({
+          success: false,
+          error: 'Wallet address is required'
+        });
+      }
+      
+      // This is a simplified response for manual checks
+      res.json({
+        success: true,
+        result: {
+          address: address,
+          success: false,
+          reason: 'Manual check - use the real-time system for accurate results',
+          ageHours: 'N/A',
+          transactionCount: 'N/A',
+          solBalance: 'N/A'
+        }
+      });
+    });
+
     // Socket.IO connection handling
     this.io.on('connection', (socket) => {
       console.log('🌐 Client connected to web dashboard');
