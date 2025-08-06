@@ -1,7 +1,7 @@
 {
-  "name": "freshies-wallet-tracker",
+  "name": "unrekt-insiders-tracker",
   "version": "1.0.0",
-  "description": "Track new wallets on Solana using Helius RPC and Solana MCP",
+  "description": "Track unrekt insiders and fresh wallets on Solana using Helius RPC",
   "main": "fresh-wallet-detector.js",
   "type": "module",
   "scripts": {
@@ -26,10 +26,11 @@
   "keywords": [
     "solana",
     "helius",
+    "unrekt",
+    "insiders",
     "wallet-tracking",
-    "blockchain",
-    "mcp"
+    "blockchain"
   ],
-  "author": "Freshies Tracker",
+  "author": "$UNREKT Insiders Tracker",
   "license": "MIT"
 }

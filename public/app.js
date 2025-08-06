@@ -1,5 +1,5 @@
-// Freshies Web Dashboard - Vercel Compatible Version
-class FreshiesDashboard {
+// $UNREKT Web Dashboard - Vercel Compatible Version
+class UnrektDashboard {
     constructor() {
         this.isPaused = false;
         this.freshWalletCount = 0;
@@ -30,7 +30,7 @@ class FreshiesDashboard {
     }
 
     async init() {
-        console.log('🚀 Initializing Freshies Dashboard (Vercel)...');
+        console.log('🚀 Initializing $UNREKT Dashboard (Vercel)...');
         
         this.setupEventListeners();
         this.initializeAnalyticsTabs();
@@ -599,5 +599,5 @@ document.head.appendChild(style);
 
 // Initialize dashboard when DOM is ready
 document.addEventListener('DOMContentLoaded', () => {
-    window.dashboard = new FreshiesDashboard();
+    window.dashboard = new UnrektDashboard();
 });

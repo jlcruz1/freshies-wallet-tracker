@@ -1,5 +1,5 @@
-// Freshies Web Dashboard - Local Socket.IO Version
-class FreshiesDashboard {
+// $UNREKT Web Dashboard - Local Socket.IO Version
+class UnrektDashboard {
     constructor() {
         this.isPaused = false;
         this.freshWalletCount = 0;
@@ -31,7 +31,7 @@ class FreshiesDashboard {
     }
 
     async init() {
-        console.log('🚀 Initializing Freshies Dashboard (Local)...');
+        console.log('🚀 Initializing $UNREKT Dashboard (Local)...');
         
         // Clear any browser cache or localStorage
         this.clearBrowserCache();
@@ -568,5 +568,5 @@ document.head.appendChild(style);
 
 // Initialize dashboard when DOM is ready
 document.addEventListener('DOMContentLoaded', () => {
-    window.dashboard = new FreshiesDashboard();
+    window.dashboard = new UnrektDashboard();
 });
