@@ -1,0 +1,35 @@
+{
+  "name": "freshies-wallet-tracker",
+  "version": "1.0.0",
+  "description": "Track new wallets on Solana using Helius RPC and Solana MCP",
+  "main": "fresh-wallet-detector.js",
+  "type": "module",
+  "scripts": {
+    "start": "node fresh-wallet-detector.js",
+    "dev": "node --watch fresh-wallet-detector.js",
+    "test": "node src/test.js",
+    "build": "echo 'Build completed'",
+    "vercel-build": "echo 'Vercel build completed'"
+  },
+  "dependencies": {
+    "@solana/web3.js": "^1.87.6",
+    "cors": "^2.8.5",
+    "dotenv": "^16.3.1",
+    "express": "^5.1.0",
+    "socket.io": "^4.8.1",
+    "sqlite3": "^5.1.6",
+    "ws": "^8.16.0"
+  },
+  "devDependencies": {
+    "nodemon": "^3.0.2"
+  },
+  "keywords": [
+    "solana",
+    "helius",
+    "wallet-tracking",
+    "blockchain",
+    "mcp"
+  ],
+  "author": "Freshies Tracker",
+  "license": "MIT"
+}

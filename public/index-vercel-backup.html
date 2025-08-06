@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Freshies - Fresh Wallet Tracker</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div class="app-container">
+        <!-- Header -->
+        <header class="header">
+            <div class="header-content">
+                <div class="logo">
+                    <i class="fas fa-seedling"></i>
+                    <h1>Freshies</h1>
+                </div>
+                <div class="header-subtitle">
+                    <p>Real-time Solana Fresh Wallet Detection</p>
+                </div>
+            </div>
+        </header>
+
+        <!-- Statistics Grid -->
+        <section class="stats-section">
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-icon">
+                        <i class="fas fa-search"></i>
+                    </div>
+                    <h3 id="totalWallets">0</h3>
+                    <p>Total Checked</p>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon">
+                        <i class="fas fa-seedling"></i>
+                    </div>
+                    <h3 id="freshWallets">0</h3>
+                    <p>Fresh Found</p>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon">
+                        <i class="fas fa-times-circle"></i>
+                    </div>
+                    <h3 id="failedWallets">0</h3>
+                    <p>Failed Checks</p>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon">
+                        <i class="fas fa-whale"></i>
+                    </div>
+                    <h3 id="whaleWallets">0</h3>
+                    <p>Whales Found</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Manual Wallet Check -->
+        <section class="manual-check">
+            <div class="check-container">
+                <h3>Manual Wallet Check</h3>
+                <div class="check-input">
+                    <input type="text" id="walletAddress" placeholder="Enter wallet address to check...">
+                    <button id="manualCheck">Check Wallet</button>
+                </div>
+            </div>
+        </section>
+
+        <!-- Trading Patterns Analytics -->
+        <section class="analytics-section">
+            <h2>Trading Patterns</h2>
+            <div class="analytics-grid">
+                <!-- All Trades -->
+                <div class="analytics-card" data-category="all">
+                    <div class="analytics-header">
+                        <h3>All Trades</h3>
+                        <div class="time-tabs">
+                            <button class="tab-btn active" data-time="5min">5min</button>
+                            <button class="tab-btn" data-time="10min">10min</button>
+                            <button class="tab-btn" data-time="20min">20min</button>
+                        </div>
+                    </div>
+                    <div class="token-list" id="tokens-all">
+                        <div class="empty-state">
+                            <i class="fas fa-chart-line"></i>
+                            <p>Loading token data...</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Fresh Wallets Only -->
+                <div class="analytics-card" data-category="success">
+                    <div class="analytics-header">
+                        <h3>Fresh Wallets Only</h3>
+                        <div class="time-tabs">
+                            <button class="tab-btn active" data-time="5min">5min</button>
+                            <button class="tab-btn" data-time="10min">10min</button>
+                            <button class="tab-btn" data-time="20min">20min</button>
+                        </div>
+                    </div>
+                    <div class="token-list" id="tokens-success">
+                        <div class="empty-state">
+                            <i class="fas fa-seedling"></i>
+                            <p>Loading fresh wallet trades...</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Failed Checks Only -->
+                <div class="analytics-card" data-category="failed">
+                    <div class="analytics-header">
+                        <h3>Failed Checks Only</h3>
+                        <div class="time-tabs">
+                            <button class="tab-btn active" data-time="5min">5min</button>
+                            <button class="tab-btn" data-time="10min">10min</button>
+                            <button class="tab-btn" data-time="20min">20min</button>
+                        </div>
+                    </div>
+                    <div class="token-list" id="tokens-failed">
+                        <div class="empty-state">
+                            <i class="fas fa-times-circle"></i>
+                            <p>Loading failed check data...</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Whale Wallets Section -->
+        <section class="wallet-section" id="whaleWalletsSection">
+            <div class="wallet-header">
+                <h2>
+                    <i class="fas fa-whale whale-icon"></i>
+                    Whale Detections (100+ SOL)
+                </h2>
+                <p class="wallet-count">
+                    <span id="whaleWalletCount">0</span> whales found
+                </p>
+            </div>
+            <div class="whale-tabs">
+                <button class="tab-btn active" data-whale-tab="all">All Whales</button>
+                <button class="tab-btn" data-whale-tab="fresh">Fresh Whales</button>
+            </div>
+            <div class="whale-list" id="allWhalesList">
+                <div class="empty-state">
+                    <i class="fas fa-whale"></i>
+                    <p>Check wallets manually to find whales...</p>
+                </div>
+            </div>
+            <div class="whale-list" id="freshWhalesList" style="display: none;">
+                <div class="empty-state">
+                    <i class="fas fa-whale"></i>
+                    <p>Fresh whale wallets will appear here...</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Fresh Wallets Section -->
+        <section class="wallet-section" id="freshWalletsSection">
+            <div class="wallet-header">
+                <h2>
+                    <i class="fas fa-seedling"></i>
+                    Fresh Wallets Detected
+                </h2>
+                <p class="wallet-count">
+                    <span id="freshWalletCount">0</span> fresh wallets found
+                </p>
+            </div>
+            <div class="wallet-list" id="freshWalletsList">
+                <div class="empty-state">
+                    <i class="fas fa-seedling"></i>
+                    <p>Check wallets manually to find fresh ones...</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Failed Wallets Section -->
+        <section class="wallet-section" id="failedWalletsSection">
+            <div class="wallet-header">
+                <h2>
+                    <i class="fas fa-times-circle"></i>
+                    Failed Wallet Checks
+                </h2>
+                <p class="wallet-count">
+                    <span id="failedWalletCount">0</span> failed checks
+                </p>
+            </div>
+            <div class="wallet-list" id="failedWalletsList">
+                <div class="empty-state">
+                    <i class="fas fa-times-circle"></i>
+                    <p>Failed wallet checks will appear here...</p>
+                </div>
+            </div>
+        </section>
+    </div>
+
+    <!-- Notification Toast -->
+    <div class="toast" id="toast">
+        <i class="fas fa-check-circle"></i>
+        <span id="toastMessage">Wallet checked!</span>
+    </div>
+
+    <!-- Scripts -->
+    <script src="app.js"></script>
+    <script>
+        // Override any Socket.IO attempts
+        window.io = undefined;
+    </script>
+</body>
+</html>

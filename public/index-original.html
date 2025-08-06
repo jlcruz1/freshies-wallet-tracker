@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🌟 Freshies - Real-Time Solana Wallet Tracker</title>
+    <link rel="stylesheet" href="styles.css">
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;500;600;700&family=Orbitron:wght@400;700;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+
+    
+    <div class="container">
+        <!-- Header -->
+        <header class="header">
+            <div class="header-content">
+                <div class="logo">
+                    <i class="fas fa-wallet"></i>
+                    <h1>Freshies</h1>
+                </div>
+                <div class="header-info">
+                    <p class="subtitle">Real-Time Solana Fresh Wallet Detection</p>
+                    <div class="status-indicator connected">
+                        <i class="fas fa-circle"></i>
+                        <span>Live</span>
+                    </div>
+                </div>
+            </div>
+        </header>
+
+        <!-- Stats Dashboard -->
+        <section class="stats-section">
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-icon">
+                        <i class="fas fa-users"></i>
+                    </div>
+                    <h3 id="totalWallets">0</h3>
+                    <p>Total Detected</p>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon">
+                        <i class="fas fa-seedling"></i>
+                    </div>
+                    <h3 id="freshWallets">0</h3>
+                    <p>Fresh Wallets</p>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon">
+                        <i class="fas fa-clock"></i>
+                    </div>
+                    <h3 id="failedWallets">0</h3>
+                    <p>Non-Fresh</p>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon">
+                        <i class="fas fa-whale"></i>
+                    </div>
+                    <h3 id="whaleWallets">0</h3>
+                    <p>Whales Found</p>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon">
+                        <i class="fas fa-percentage"></i>
+                    </div>
+                    <h3 id="successRate">0%</h3>
+                    <p>Success Rate</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Whale Wallets Section -->
+        <section class="wallet-section" id="whaleWalletsSection">
+            <div class="wallet-header">
+                <h2>
+                    <i class="fas fa-whale whale-icon"></i>
+                    Whale Detections (100+ SOL)
+                </h2>
+                <p class="wallet-count">
+                    <span id="whaleWalletCount">0</span> whales found
+                </p>
+            </div>
+            <div class="whale-tabs">
+                <button class="tab-btn active" data-whale-tab="all">All Whales</button>
+                <button class="tab-btn" data-whale-tab="fresh">Fresh Whales</button>
+            </div>
+            <div class="whale-list" id="allWhalesList">
+                <div class="empty-state">
+                    <i class="fas fa-whale"></i>
+                    <p>Waiting for whale wallets...</p>
+                </div>
+            </div>
+            <div class="whale-list" id="freshWhalesList" style="display: none;">
+                <div class="empty-state">
+                    <i class="fas fa-whale"></i>
+                    <p>Waiting for fresh whale wallets...</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Fresh Wallets Section -->
+        <section class="wallet-section" id="freshWalletsSection">
+            <div class="wallet-header">
+                <h2>
+                    <i class="fas fa-check-circle success-icon"></i>
+                    Fresh Wallet Detections
+                </h2>
+                <p class="wallet-count">
+                    <span id="freshWalletCount">0</span> fresh wallets found
+                </p>
+            </div>
+            <div class="wallet-list" id="freshWalletsList">
+                <div class="empty-state">
+                    <i class="fas fa-seedling"></i>
+                    <p>Waiting for fresh wallets...</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Failed Wallets Section -->
+        <section class="wallet-section failed" id="failedWalletsSection">
+            <div class="wallet-header">
+                <h2>
+                    <i class="fas fa-times-circle failed-icon"></i>
+                    Failed Wallet Checks
+                </h2>
+                <p class="wallet-count">
+                    <span id="failedWalletCount">0</span> failed checks
+                </p>
+            </div>
+            <div class="wallet-list" id="failedWalletsList">
+                <div class="empty-state">
+                    <i class="fas fa-clock"></i>
+                    <p>No failed checks yet...</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Trading Patterns Analytics Section -->
+        <section class="analytics-section">
+            <div class="analytics-header">
+                <h3>🔥 Trading Patterns - Most Traded Tokens</h3>
+            </div>
+            <div class="analytics-grid">
+                <!-- All Trades Analytics -->
+                <div class="analytics-card">
+                    <div class="analytics-card-header">
+                        <h4>📊 All Trades</h4>
+                        <div class="time-tabs">
+                            <button class="time-tab active" data-category="all" data-time="5">5min</button>
+                            <button class="time-tab" data-category="all" data-time="10">10min</button>
+                            <button class="time-tab" data-category="all" data-time="20">20min</button>
+                        </div>
+                    </div>
+                    <div class="token-list" id="tokens-all">
+                        <div class="empty-state">
+                            <i class="fas fa-chart-line"></i>
+                            <p>Analyzing patterns...</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Fresh Wallets Analytics -->
+                <div class="analytics-card success-card">
+                    <div class="analytics-card-header">
+                        <h4>✅ Fresh Wallets Only</h4>
+                        <div class="time-tabs">
+                            <button class="time-tab active" data-category="success" data-time="5">5min</button>
+                            <button class="time-tab" data-category="success" data-time="10">10min</button>
+                            <button class="time-tab" data-category="success" data-time="20">20min</button>
+                        </div>
+                    </div>
+                    <div class="token-list" id="tokens-success">
+                        <div class="empty-state">
+                            <i class="fas fa-seedling"></i>
+                            <p>Waiting for fresh trades...</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Failed Checks Analytics -->
+                <div class="analytics-card failed-card">
+                    <div class="analytics-card-header">
+                        <h4>❌ Failed Checks Only</h4>
+                        <div class="time-tabs">
+                            <button class="time-tab active" data-category="failed" data-time="5">5min</button>
+                            <button class="time-tab" data-category="failed" data-time="10">10min</button>
+                            <button class="time-tab" data-category="failed" data-time="20">20min</button>
+                        </div>
+                    </div>
+                    <div class="token-list" id="tokens-failed">
+                        <div class="empty-state">
+                            <i class="fas fa-times-circle"></i>
+                            <p>Waiting for failed trades...</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </div>
+
+    <!-- Notification Toast -->
+    <div class="toast" id="toast">
+        <i class="fas fa-check-circle"></i>
+        <span id="toastMessage">New wallet detected!</span>
+    </div>
+
+    <!-- Scripts -->
+    <script src="/socket.io/socket.io.js"></script>
+    
+
+    
+    <script src="app.js"></script>
+</body>
+</html>
