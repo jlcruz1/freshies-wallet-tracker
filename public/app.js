@@ -300,19 +300,25 @@ class UnrektDashboard {
             const inputToken = token.inputToken?.mint || token.inputToken?.symbol || 'Unknown';
             const outputToken = token.outputToken?.mint || token.outputToken?.symbol || 'Unknown';
             
+            // Use the primary token (prefer non-SOL token if available)
+            let primaryToken = inputToken;
+            if (inputToken === 'So11111111111111111111111111111111111111112' || inputToken === 'WSOL') {
+                primaryToken = outputToken;
+            } else if (outputToken !== 'So11111111111111111111111111111111111111112' && outputToken !== 'WSOL' && outputToken !== inputToken) {
+                // If they're different and output isn't SOL, prefer the longer one (likely the actual token)
+                primaryToken = outputToken.length > inputToken.length ? outputToken : inputToken;
+            }
+            
             tokenElement.innerHTML = `
                 <div class="token-rank">#${index + 1}</div>
                 <div class="token-info">
-                    <div class="token-pair">
-                        <span class="token-symbol" title="${inputToken}">${this.formatTokenDisplay(inputToken)}</span>
-                        →
-                        <span class="token-symbol" title="${outputToken}">${this.formatTokenDisplay(outputToken)}</span>
+                    <div class="token-address" title="Click to copy ${primaryToken}">
+                        <span class="token-mint">${this.formatTokenDisplay(primaryToken)}</span>
                     </div>
                     <div class="token-count">${token.count || 0} trades</div>
                 </div>
                 <div class="token-actions">
-                    <button onclick="copyToClipboard('${inputToken}')" class="copy-btn" title="Copy input token">📋</button>
-                    <button onclick="copyToClipboard('${outputToken}')" class="copy-btn" title="Copy output token">📋</button>
+                    <button onclick="copyToClipboard('${primaryToken}')" class="copy-btn" title="Copy token address">📋</button>
                 </div>
             `;
             
