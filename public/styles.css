@@ -300,7 +300,7 @@ body::before {
 
 .analytics-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+    grid-template-columns: repeat(auto-fit, minmax(380px, 1fr));
     gap: var(--spacing-lg);
 }
 
@@ -332,6 +332,7 @@ body::before {
     margin-bottom: var(--spacing-lg);
     flex-wrap: wrap;
     gap: var(--spacing-md);
+    position: relative;
 }
 
 .analytics-header h3 {
@@ -346,6 +347,9 @@ body::before {
     border-radius: var(--border-radius);
     padding: 4px;
     gap: 4px;
+    margin-left: auto;          /* keep tabs on the right inside the header */
+    align-self: center;         /* vertically center within header */
+    flex: 0 0 auto;             /* prevent shrinking or wrapping unexpectedly */
 }
 
 .tab-btn {
