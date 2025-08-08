@@ -344,7 +344,8 @@ class UnrektDashboard {
             
             // Optional market badge if backend enriched it (future use)
             const logoHtml = token.meta?.logoURI ? `<img class=\"token-logo\" src=\"${token.meta.logoURI}\" alt=\"logo\" onerror=\"this.style.display='none'\"/>` : '';
-            const symbolHtml = token.meta?.symbol ? `<span class=\"token-symbol-tag\">${token.meta.symbol}</span>` : '';
+            const resolvedSymbol = token.meta?.symbol || token.displaySymbol;
+            const symbolHtml = resolvedSymbol ? `<span class=\"token-symbol-tag\">${resolvedSymbol}</span>` : '';
             const marketBadge = token.market?.marketCap ? `<span class=\"market-cap\">$${Number(token.market.marketCap).toLocaleString()} MC</span>` : '';
 
             tokenElement.innerHTML = `

@@ -1276,9 +1276,17 @@ class FreshWalletDetector {
         if (meta) {
           // Attach a compact view
           t.meta = meta;
-          // Also fill symbol if missing
-          if (!t.inputToken?.symbol && t.inputToken) t.inputToken.symbol = meta.symbol || t.inputToken.mint;
-          if (!t.outputToken?.symbol && t.outputToken) t.outputToken.symbol = meta.symbol || t.outputToken.mint;
+          // Also fill symbol if missing or equals the mint
+          const shouldOverrideIn = !t.inputToken?.symbol || t.inputToken.symbol === t.inputToken.mint || (t.inputToken.symbol?.length || 0) > 20;
+          const shouldOverrideOut = !t.outputToken?.symbol || t.outputToken.symbol === t.outputToken.mint || (t.outputToken.symbol?.length || 0) > 20;
+          if (shouldOverrideIn && t.inputToken) t.inputToken.symbol = meta.symbol || t.inputToken.mint;
+          if (shouldOverrideOut && t.outputToken) t.outputToken.symbol = meta.symbol || t.outputToken.mint;
+        }
+        // Derive a display symbol fallback from DexScreener if metadata not present
+        if (!t.meta?.symbol && md?.symbol) {
+          t.displaySymbol = md.symbol;
+        } else if (t.meta?.symbol) {
+          t.displaySymbol = t.meta.symbol;
         }
         return t;
       } catch {
