@@ -300,7 +300,7 @@ body::before {
 
 .analytics-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(380px, 1fr));
+    grid-template-columns: repeat(auto-fit, minmax(520px, 1fr));
     gap: var(--spacing-lg);
 }
 
@@ -377,7 +377,7 @@ body::before {
 
 /* ===== TOKEN LIST STYLES ===== */
 .token-list {
-    max-height: 400px;
+    max-height: 520px;
     overflow-y: auto;
     scrollbar-width: thin;
     scrollbar-color: rgba(255, 154, 86, 0.3) transparent;
@@ -400,13 +400,13 @@ body::before {
     background: var(--bg-secondary);
     border: 1px solid rgba(255, 154, 86, 0.2);
     border-radius: var(--border-radius);
-    padding: var(--spacing-sm);
+    padding: var(--spacing-md);
     margin-bottom: var(--spacing-sm);
     transition: all 0.3s ease;
     position: relative;
     overflow: hidden;
     display: flex;
-    align-items: center;
+    align-items: flex-start;
     gap: var(--spacing-sm);
 }
 
@@ -439,11 +439,13 @@ body::before {
     display: flex;
     align-items: center;
     gap: 6px;
+    flex-wrap: wrap;
+    width: 100%;
 }
 
 .token-mint {
     font-family: var(--font-mono);
-    font-size: 0.65rem;
+    font-size: 0.75rem;
     color: var(--text-primary);
     word-break: break-all;
     line-height: 1.2;
@@ -481,6 +483,7 @@ body::before {
 
 .token-actions {
     flex-shrink: 0;
+    align-self: flex-start;
 }
 
 .token-header {

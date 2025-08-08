@@ -346,7 +346,8 @@ class UnrektDashboard {
             const logoHtml = token.meta?.logoURI ? `<img class=\\"token-logo\\" src=\\"${token.meta.logoURI}\\" alt=\\"logo\\" onerror=\\"this.style.display='none'\\"/>` : '';
             const resolvedSymbol = token.meta?.symbol || token.displaySymbol;
             const symbolHtml = resolvedSymbol ? `<span class=\\"token-symbol-tag\\">${resolvedSymbol}</span>` : '';
-            const marketBadge = token.market?.marketCap ? `<span class=\"market-cap\">$${Number(token.market.marketCap).toLocaleString()} MC</span>` : '';
+            const mcapValue = token.market?.marketCap ?? token.market?.fdv;
+            const marketBadge = mcapValue ? `<span class=\"market-cap\">$${Number(mcapValue).toLocaleString()} MC</span>` : '';
 
             tokenElement.innerHTML = `
                 <div class="token-rank">#${index + 1}</div>
