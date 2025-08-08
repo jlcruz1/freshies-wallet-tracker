@@ -31,6 +31,9 @@ class FreshWalletDetector {
     this.maxChecksPerMinute = parseInt(process.env.MAX_CHECKS_PER_MINUTE) || 12; // Increased to 12 per minute
     this.samplingRate = parseFloat(process.env.SAMPLING_RATE) || 0.08; // Increased to 8%
     
+    // Emission windows
+    this.whaleEmitWindowMinutes = parseInt(process.env.WHALE_EMIT_WINDOW_MINUTES || '10');
+    
     // Tracking variables
     this.processedWallets = new Set();
     this.checkCount = 0;
@@ -239,15 +242,9 @@ class FreshWalletDetector {
       // Send current stats when client connects
       socket.emit('stats', this.stats);
       
-      // Send current analytics if available
-      if (this.tokenTracker && this.tokenTracker.all.length > 0) {
-        this.emitTokenAnalytics();
-      }
-      
-      // Send current whale analytics if available
-      if (this.whaleTracker && this.whaleTracker.all.length > 0) {
-        this.emitWhaleAnalytics();
-      }
+      // Always emit fresh analytics (will be empty if nothing recent)
+      this.emitTokenAnalytics();
+      this.emitWhaleAnalytics();
       
       socket.on('disconnect', () => {
         console.log('🌐 Client disconnected from web dashboard');
@@ -311,7 +308,8 @@ class FreshWalletDetector {
       ws.on('close', () => {
         console.log('🔄 WebSocket connection closed, reconnecting...');
         this.ws = null;
-        setTimeout(() => this.connectToHelius(), 5000);
+        // Attempt full reconnect including resubscription
+        setTimeout(() => this.reconnectHelius(), 5000);
       });
       
       ws.on('message', (data) => {
@@ -323,6 +321,20 @@ class FreshWalletDetector {
         }
       });
     });
+  }
+
+  /**
+   * Reconnect to Helius and re-subscribe to program logs
+   */
+  async reconnectHelius() {
+    try {
+      await this.connectToHelius();
+      await this.subscribeToRaydiumSwaps();
+      console.log('🔁 Re-subscribed to Raydium programs after reconnect');
+    } catch (error) {
+      console.error('❌ Reconnect failed, retrying in 5s:', error.message);
+      setTimeout(() => this.reconnectHelius(), 5000);
+    }
   }
 
   /**
@@ -951,11 +963,16 @@ class FreshWalletDetector {
   emitWhaleAnalytics() {
     if (!this.io) return;
     
+    // Only emit recent whales to avoid showing stale data on first visit
+    const cutoff = Date.now() - (this.whaleEmitWindowMinutes * 60 * 1000);
+    const recentAll = this.whaleTracker.all.filter(entry => entry.timestamp >= cutoff);
+    const recentFresh = this.whaleTracker.fresh.filter(entry => entry.timestamp >= cutoff);
+    
     const whaleAnalytics = {
-      allWhales: this.whaleTracker.all.slice(-20), // Last 20 whales
-      freshWhales: this.whaleTracker.fresh.slice(-20), // Last 20 fresh whales
-      totalWhales: this.whaleTracker.all.length,
-      totalFreshWhales: this.whaleTracker.fresh.length
+      allWhales: recentAll.slice(-20),
+      freshWhales: recentFresh.slice(-20),
+      totalWhales: recentAll.length,
+      totalFreshWhales: recentFresh.length
     };
     
     console.log('📊 Emitting whale analytics:', {
