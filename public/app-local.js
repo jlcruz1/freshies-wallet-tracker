@@ -343,13 +343,15 @@ class UnrektDashboard {
             console.log(`🔍 Primary token selected: "${primaryToken}" from input: "${inputToken}", output: "${outputToken}"`);
             
             // Optional market badge if backend enriched it (future use)
-            const marketBadge = token.market?.marketCap ? `<span class="market-cap">$${Number(token.market.marketCap).toLocaleString()} MC</span>` : '';
+            const logoHtml = token.meta?.logoURI ? `<img class=\"token-logo\" src=\"${token.meta.logoURI}\" alt=\"logo\" onerror=\"this.style.display='none'\"/>` : '';
+            const symbolHtml = token.meta?.symbol ? `<span class=\"token-symbol-tag\">${token.meta.symbol}</span>` : '';
+            const marketBadge = token.market?.marketCap ? `<span class=\"market-cap\">$${Number(token.market.marketCap).toLocaleString()} MC</span>` : '';
 
             tokenElement.innerHTML = `
                 <div class="token-rank">#${index + 1}</div>
                 <div class="token-info">
                     <div class="token-address" title="Click to copy ${primaryToken}">
-                        <span class="token-mint">${this.formatTokenDisplay(primaryToken)}</span> ${marketBadge}
+                        ${logoHtml}<span class="token-mint">${symbolHtml ? symbolHtml : this.formatTokenDisplay(primaryToken)}</span> ${marketBadge}
                     </div>
                     <div class="token-count">${token.count || 0} trades</div>
                 </div>

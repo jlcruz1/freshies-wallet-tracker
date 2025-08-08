@@ -48,6 +48,9 @@ class FreshWalletDetector {
     // Market data cache (DexScreener)
     this.marketDataCache = new Map(); // mint -> { symbol, priceUsd, marketCap, liquidityUsd, ts }
     
+    // Token metadata cache (Helius)
+    this.tokenMetaCache = new Map(); // mint -> { symbol, name, logoURI, decimals, ts }
+    
     // Tracking variables
     this.processedWallets = new Set();
     this.checkCount = 0;
@@ -436,6 +439,46 @@ class FreshWalletDetector {
       return data;
     } catch (e) {
       return null;
+    }
+  }
+
+  /**
+   * Fetch token metadata via Helius (batchable but we use single best‑effort here)
+   */
+  async fetchTokenMetadata(mints) {
+    try {
+      const list = Array.isArray(mints) ? mints : [mints];
+      const uncached = list.filter((m) => {
+        const c = this.tokenMetaCache.get(m);
+        return !c || (Date.now() - (c.ts || 0)) > 24 * 60 * 60 * 1000; // 24h TTL
+      });
+      if (uncached.length === 0) {
+        return list.map((m) => this.tokenMetaCache.get(m));
+      }
+      const url = `https://api.helius.xyz/v0/tokens/metadata?api-key=${this.heliusApiKey}`;
+      const res = await fetch(url, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ mintAccounts: uncached })
+      });
+      if (res.ok) {
+        const json = await res.json();
+        for (const item of json) {
+          const mint = item?.mint || item?.account;
+          if (!mint) continue;
+          const meta = {
+            symbol: item?.symbol || item?.onChainMetadata?.metadata?.data?.symbol,
+            name: item?.name || item?.onChainMetadata?.metadata?.data?.name,
+            logoURI: item?.logo || item?.image || item?.offChainMetadata?.metadata?.image || item?.extensions?.image,
+            decimals: item?.decimals,
+            ts: Date.now()
+          };
+          this.tokenMetaCache.set(mint, meta);
+        }
+      }
+      return list.map((m) => this.tokenMetaCache.get(m));
+    } catch (e) {
+      return list.map((m) => this.tokenMetaCache.get(m));
     }
   }
 
@@ -1224,8 +1267,19 @@ class FreshWalletDetector {
       try {
         const mint = t?.outputToken?.mint || t?.inputToken?.mint;
         if (!mint) return t;
-        const md = await this.fetchDexScreener(mint);
+        const [md] = await Promise.all([
+          this.fetchDexScreener(mint),
+          this.fetchTokenMetadata(mint)
+        ]);
         if (md) t.market = md;
+        const meta = this.tokenMetaCache.get(mint);
+        if (meta) {
+          // Attach a compact view
+          t.meta = meta;
+          // Also fill symbol if missing
+          if (!t.inputToken?.symbol && t.inputToken) t.inputToken.symbol = meta.symbol || t.inputToken.mint;
+          if (!t.outputToken?.symbol && t.outputToken) t.outputToken.symbol = meta.symbol || t.outputToken.mint;
+        }
         return t;
       } catch {
         return t;
