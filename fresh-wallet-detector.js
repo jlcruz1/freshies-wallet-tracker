@@ -23,8 +23,19 @@ class FreshWalletDetector {
   constructor() {
     // Core configuration
     this.heliusApiKey = process.env.HELIUS_API_KEY;
-    this.rpcUrl = `https://mainnet.helius-rpc.com/?api-key=${this.heliusApiKey}`;
-    this.wsUrl = `wss://mainnet.helius-rpc.com/?api-key=${this.heliusApiKey}`;
+    this.heliusApiKey2 = process.env.HELIUS_API_KEY_2; // optional secondary key
+    this.rpcEndpoints = [
+      `https://mainnet.helius-rpc.com/?api-key=${this.heliusApiKey}`,
+      this.heliusApiKey2 ? `https://mainnet.helius-rpc.com/?api-key=${this.heliusApiKey2}` : null
+    ].filter(Boolean);
+    this.wsEndpoints = [
+      `wss://mainnet.helius-rpc.com/?api-key=${this.heliusApiKey}`,
+      this.heliusApiKey2 ? `wss://mainnet.helius-rpc.com/?api-key=${this.heliusApiKey2}` : null
+    ].filter(Boolean);
+    this.rpcIndex = 0;
+    this.wsIndex = 0;
+    this.rpcUrl = this.rpcEndpoints[0];
+    this.wsUrl = this.wsEndpoints[0];
     
     // Rate limiting and throttling (optimized for speed while avoiding 429 errors)
     this.processingDelay = parseInt(process.env.PROCESSING_DELAY) || 4000; // Reduced to 4 seconds
@@ -33,6 +44,9 @@ class FreshWalletDetector {
     
     // Emission windows
     this.whaleEmitWindowMinutes = parseInt(process.env.WHALE_EMIT_WINDOW_MINUTES || '10');
+    
+    // Market data cache (DexScreener)
+    this.marketDataCache = new Map(); // mint -> { symbol, priceUsd, marketCap, liquidityUsd, ts }
     
     // Tracking variables
     this.processedWallets = new Set();
@@ -100,12 +114,30 @@ class FreshWalletDetector {
       // Setup web dashboard
       await this.setupWebDashboard();
       
+      // Pre-warm market cache periodically (optional lightweight noop)
+      this.startMarketDataInterval();
+      
       console.log('✅ Fresh Wallet Detection System initialized successfully');
       return true;
     } catch (error) {
       console.error('❌ Failed to initialize:', error.message);
       return false;
     }
+  }
+
+  /**
+   * Periodic cache cleanup for market data
+   */
+  startMarketDataInterval() {
+    setInterval(() => {
+      const now = Date.now();
+      const ttlMs = 5 * 60 * 1000; // 5 minutes cache TTL
+      for (const [mint, data] of this.marketDataCache.entries()) {
+        if (!data || (now - (data.ts || 0)) > ttlMs) {
+          this.marketDataCache.delete(mint);
+        }
+      }
+    }, 60 * 1000);
   }
 
   /**
@@ -302,6 +334,9 @@ class FreshWalletDetector {
       ws.on('error', (error) => {
         console.error('❌ WebSocket error:', error.message);
         this.ws = null;
+        // Try next WS endpoint if available
+        this.wsIndex = (this.wsIndex + 1) % this.wsEndpoints.length;
+        this.wsUrl = this.wsEndpoints[this.wsIndex];
         reject(error);
       });
       
@@ -328,6 +363,9 @@ class FreshWalletDetector {
    */
   async reconnectHelius() {
     try {
+      // rotate URLs for resilience
+      this.wsIndex = (this.wsIndex + 1) % this.wsEndpoints.length;
+      this.wsUrl = this.wsEndpoints[this.wsIndex];
       await this.connectToHelius();
       await this.subscribeToRaydiumSwaps();
       console.log('🔁 Re-subscribed to Raydium programs after reconnect');
@@ -367,6 +405,37 @@ class FreshWalletDetector {
         console.error(`❌ Failed to subscribe to ${programId}:`, error.message);
         throw error;
       }
+    }
+  }
+
+  /**
+   * Fetch market data from DexScreener (free, no key)
+   */
+  async fetchDexScreener(mint) {
+    try {
+      const cached = this.marketDataCache.get(mint);
+      const now = Date.now();
+      if (cached && (now - (cached.ts || 0)) < 5 * 60 * 1000) {
+        return cached;
+      }
+      const url = `https://api.dexscreener.com/latest/dex/tokens/${mint}`;
+      const res = await fetch(url, { method: 'GET' });
+      if (!res.ok) return null;
+      const json = await res.json();
+      const pair = Array.isArray(json?.pairs) ? json.pairs[0] : null;
+      if (!pair) return null;
+      const data = {
+        symbol: pair.baseToken?.symbol || pair.quoteToken?.symbol || undefined,
+        priceUsd: pair.priceUsd ? Number(pair.priceUsd) : undefined,
+        marketCap: pair.marketCap ? Number(pair.marketCap) : (pair.fdv ? Number(pair.fdv) : undefined),
+        liquidityUsd: pair.liquidity?.usd ? Number(pair.liquidity.usd) : undefined,
+        dex: pair.dexId,
+        ts: now
+      };
+      this.marketDataCache.set(mint, data);
+      return data;
+    } catch (e) {
+      return null;
     }
   }
 
@@ -918,7 +987,20 @@ class FreshWalletDetector {
    */
   async getSOLBalance(walletAddress) {
     try {
-      const balance = await this.rpcConnection.getBalance(new PublicKey(walletAddress));
+      let balance;
+      try {
+        balance = await this.rpcConnection.getBalance(new PublicKey(walletAddress));
+      } catch (e) {
+        // rotate to next RPC endpoint on failure
+        if (this.rpcEndpoints.length > 1) {
+          this.rpcIndex = (this.rpcIndex + 1) % this.rpcEndpoints.length;
+          this.rpcUrl = this.rpcEndpoints[this.rpcIndex];
+          this.rpcConnection = new Connection(this.rpcUrl, 'confirmed');
+          balance = await this.rpcConnection.getBalance(new PublicKey(walletAddress));
+        } else {
+          throw e;
+        }
+      }
       const solBalance = balance / 1e9; // Convert lamports to SOL
       return solBalance;
     } catch (error) {
@@ -952,6 +1034,18 @@ class FreshWalletDetector {
     const cutoff = timestamp - (24 * 60 * 60 * 1000);
     this.whaleTracker.all = this.whaleTracker.all.filter(entry => entry.timestamp > cutoff);
     this.whaleTracker.fresh = this.whaleTracker.fresh.filter(entry => entry.timestamp > cutoff);
+    
+    // Enrich with market data asynchronously (best‑effort)
+    const primaryMint = tokenInfo?.outputToken?.mint || tokenInfo?.inputToken?.mint;
+    if (primaryMint) {
+      this.fetchDexScreener(primaryMint).then((md) => {
+        if (md) {
+          whaleEntry.market = md;
+          // ensure arrays reference updated object
+          this.emitWhaleAnalytics();
+        }
+      }).catch(() => {});
+    }
     
     // Emit whale analytics
     this.emitWhaleAnalytics();
@@ -1080,7 +1174,7 @@ class FreshWalletDetector {
   /**
    * Emit token analytics to dashboard
    */
-  emitTokenAnalytics() {
+  async emitTokenAnalytics() {
     if (!this.io) return;
     
     const analytics = {
@@ -1101,6 +1195,16 @@ class FreshWalletDetector {
       }
     };
     
+    // Enrich with market data (uses 5m cache to keep light)
+    const periods = ['5min','10min','20min'];
+    const categories = ['all','success','failed'];
+    for (const cat of categories) {
+      for (const period of periods) {
+        const list = analytics[cat][period];
+        await this.enrichTokensWithMarket(list);
+      }
+    }
+    
     console.log('📊 Emitting token analytics:', {
       all_5min: analytics.all['5min'].length,
       success_5min: analytics.success['5min'].length,
@@ -1109,6 +1213,26 @@ class FreshWalletDetector {
     });
     
     this.io.emit('tokenAnalytics', analytics);
+  }
+
+  /**
+   * Attach market data to token lists (best-effort; cached)
+   */
+  async enrichTokensWithMarket(tokens) {
+    if (!Array.isArray(tokens) || tokens.length === 0) return tokens;
+    const tasks = tokens.slice(0, 5).map(async (t) => {
+      try {
+        const mint = t?.outputToken?.mint || t?.inputToken?.mint;
+        if (!mint) return t;
+        const md = await this.fetchDexScreener(mint);
+        if (md) t.market = md;
+        return t;
+      } catch {
+        return t;
+      }
+    });
+    await Promise.all(tasks);
+    return tokens;
   }
 
   /**
