@@ -447,7 +447,7 @@ body::before {
     display: flex;
     align-items: flex-start;
     flex-direction: column;
-    gap: 4px;
+    gap: 2px;
     flex-wrap: wrap;
     width: 100%;
     overflow: visible;
@@ -460,6 +460,8 @@ body::before {
     word-break: break-word;
     overflow-wrap: anywhere;
     white-space: normal;
+    overflow: visible;
+    text-overflow: unset;
     line-height: 1.2;
     background: rgba(255, 154, 86, 0.1);
     padding: 2px 6px;
@@ -485,14 +487,15 @@ body::before {
 }
 
 .token-logo {
-    width: 16px;
-    height: 16px;
+    width: 14px;
+    height: 14px;
     border-radius: 50%;
     object-fit: cover;
 }
 
 .token-symbol-tag {
     font-weight: 600;
+    font-size: 0.7rem;
 }
 
 .token-actions {
