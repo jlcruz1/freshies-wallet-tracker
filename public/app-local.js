@@ -353,7 +353,9 @@ class UnrektDashboard {
                 <div class="token-rank">#${index + 1}</div>
                 <div class="token-info">
                     <div class="token-address" title="Click to copy ${primaryToken}">
-                        ${logoHtml}${symbolHtml ? symbolHtml + ' · ' : ''}<span class=\\"token-mint\\">${this.formatTokenDisplay(primaryToken)}</span> ${marketBadge}
+                        ${logoHtml}${symbolHtml}
+                        <span class=\\"token-mint\\">${this.formatTokenDisplay(primaryToken)}</span>
+                        ${marketBadge}
                     </div>
                     <div class="token-count">${token.count || 0} trades</div>
                 </div>

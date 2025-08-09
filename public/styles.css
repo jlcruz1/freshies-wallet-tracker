@@ -445,22 +445,24 @@ body::before {
     cursor: pointer;
     margin-bottom: 2px;
     display: flex;
-    align-items: center;
-    gap: 6px;
+    align-items: flex-start;
+    flex-direction: column;
+    gap: 4px;
     flex-wrap: wrap;
     width: 100%;
 }
 
 .token-mint {
     font-family: var(--font-mono);
-    font-size: 0.75rem;
+    font-size: 0.7rem;
     color: var(--text-primary);
     word-break: break-all;
     line-height: 1.2;
     background: rgba(255, 154, 86, 0.1);
     padding: 2px 6px;
     border-radius: 4px;
-    display: inline-block;
+    display: block;
+    width: 100%;
     max-width: 100%;
     transition: background-color 0.2s ease;
 }
@@ -472,7 +474,8 @@ body::before {
 .market-cap {
     font-size: 0.65rem;
     color: var(--text-secondary);
-    margin-left: 6px;
+    margin-left: 0;
+    margin-top: 2px;
     background: rgba(0,0,0,0.04);
     padding: 2px 6px;
     border-radius: 4px;
